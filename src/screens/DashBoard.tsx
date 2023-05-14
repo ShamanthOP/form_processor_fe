@@ -1,4 +1,4 @@
-import { gql, useQuery } from "@apollo/client";
+import { gql, useMutation, useQuery } from "@apollo/client";
 import { DataGrid, GridColDef, GridValueGetterParams } from "@mui/x-data-grid";
 import styled from "@emotion/styled";
 import React from "react";
@@ -8,7 +8,31 @@ import { SubmissionsQuery } from "../gql/graphql";
 const Container = styled.div`
     display: flex;
     height: 100vh;
-    width: 100vw;
+    width: 99vw;
+    flex-direction: column;
+`;
+
+const ToolBar = styled.div`
+    display: flex;
+    justify-content: space-between;
+    background: rgb(255, 193, 204, 0.9);
+    padding: 12px;
+    border: none;
+    box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.3);
+`;
+
+const Button = styled.button`
+    background: black;
+    color: white;
+    border-radius: 8px;
+    padding: 12px 15px;
+`;
+
+const Text = styled.h1`
+    color: black;
+    font-size: 24px;
+    margin: 0;
+    padding: 0 10px;
 `;
 
 const DashBoard = () => {
@@ -21,6 +45,15 @@ const DashBoard = () => {
             }
         }
     `);
+
+    const [generateSubmissions] = useMutation(
+        gql`
+            mutation GenerateSubmissions($count: Int!) {
+                queueSubmissionGeneration(count: $count)
+            }
+        `,
+        { variables: { count: 10 }, refetchQueries: ["Submissions"] }
+    );
 
     if (loading) {
         return <div>Loading data ...</div>;
@@ -48,9 +81,24 @@ const DashBoard = () => {
 
     return (
         <Container>
+            <ToolBar>
+                <Text>Forms Processor</Text>
+                <Button
+                    onClick={() => {
+                        generateSubmissions();
+                    }}
+                >
+                    Generate Submissions
+                </Button>
+            </ToolBar>
             <DataGrid
                 rows={submissions}
                 columns={columns}
+                sx={{
+                    margin: 4,
+                    boxShadow: 5,
+                    background: "rgb(255, 193, 204, 0.35)",
+                }}
                 disableRowSelectionOnClick
             />
         </Container>
